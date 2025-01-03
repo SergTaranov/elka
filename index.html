@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Tree</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #002b5b;
+        }
+
+        .tree-container {
+            position: relative;
+            width: 850px;
+            height: 900px;
+            background-image: url('tree.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .toy {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="tree-container" id="tree-container"></div>
+
+    <script>
+        function generateRandomPosition(width, height) {
+
+            const baseWidth = width;
+            const treeHeight = height - 40;
+
+            let x, y;
+            while (true) {
+                x = Math.random() * baseWidth;
+                y = Math.random() * treeHeight;
+                const leftSlope = baseWidth / 2 - y / treeHeight * baseWidth / 2; 
+                const rightSlope = baseWidth / 2 + y / treeHeight * baseWidth / 2;
+                if (x >=  leftSlope && x <= rightSlope) {
+                    return { x, y };
+                }
+            }
+        }
+
+function generateDefaultToy(toy) {
+
+    toy.className = 'toy';
+    const colors = ['red', 'blue', 'gold', 'green', 'silver', 'pink'];
+    toy.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+}
+
+
+        async function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function generateToy(container, toyNumber) {
+            const toy = document.createElement('div');
+            toy.id = `t${toyNumber}`;
+            const { x, y } = generateRandomPosition(container.offsetWidth, container.offsetHeight);
+            toy.style.left = `${x}px`;
+            toy.style.top = `${y}px`;
+
+            try {
+                await loadScript(`js/generatetoy${toyNumber}.js`);
+                window[`generateToy${toyNumber}`](toy);
+            } catch (error) {
+                generateDefaultToy(toy);
+            }
+            container.appendChild(toy);
+        }
+
+        async function decorateTree() {
+            const treeContainer = document.getElementById('tree-container');
+            for (let i = 1; i <= 10; i++) {
+                await generateToy(treeContainer, i);
+            }
+        }
+        window.onload = decorateTree;
+    </script>
+</body>
+</html>
